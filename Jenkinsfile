@@ -12,7 +12,7 @@ pipeline {
     // ---- Configuration -----------------------------------------------------
     environment {
         // The PRIVATE IP of the application EC2 instance (EC2 #2) inside the VPC.
-        APP_SERVER   = '10.0.1.20'          // <-- replace with EC2 #2 private IP
+        APP_SERVER   = '10.0.1.84'          // EC2 #2 (app-server) private IP
         APP_USER     = 'ubuntu'             // 'ubuntu' (Ubuntu) or 'ec2-user' (Amazon Linux)
         APP_DIR      = '/opt/movielens'     // where the app lives on EC2 #2
         SERVICE_NAME = 'movielens'          // systemd service name
