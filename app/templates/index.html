@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MovieLens User Analytics — CI/CD Demo</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root { --bg:#0f172a; --card:#1e293b; --accent:#38bdf8; --accent2:#a78bfa;
+            --text:#e2e8f0; --muted:#94a3b8; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg);
+           color:var(--text); padding:32px; line-height:1.5; }
+    header { text-align:center; margin-bottom:28px; }
+    header h1 { font-size:28px; }
+    header h1 span { color:var(--accent); }
+    header p { color:var(--muted); margin-top:6px; font-size:14px; }
+    .badge { display:inline-block; margin-top:10px; padding:6px 14px;
+             background:rgba(56,189,248,.12); color:var(--accent);
+             border:1px solid rgba(56,189,248,.3); border-radius:999px; font-size:13px; }
+    .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+            gap:16px; margin-bottom:24px; }
+    .kpi { background:var(--card); border-radius:14px; padding:22px; text-align:center;
+           border:1px solid rgba(148,163,184,.12); }
+    .kpi .num { font-size:36px; font-weight:700; color:var(--accent); }
+    .kpi .lbl { color:var(--muted); font-size:13px; margin-top:4px; text-transform:uppercase;
+                letter-spacing:.5px; }
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    @media (max-width:820px){ .grid{ grid-template-columns:1fr; } }
+    .card { background:var(--card); border-radius:14px; padding:22px;
+            border:1px solid rgba(148,163,184,.12); }
+    .card h2 { font-size:16px; margin-bottom:16px; color:var(--text); }
+    .card.full { grid-column:1 / -1; }
+    footer { text-align:center; color:var(--muted); font-size:12px; margin-top:28px; }
+    code { background:rgba(148,163,184,.15); padding:2px 7px; border-radius:6px; color:var(--accent2); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>MovieLens <span>User Analytics</span></h1>
+    <p>Automated CI/CD deployment — GitHub → Jenkins → AWS EC2, data served from AWS S3</p>
+    <div class="badge">📡 Data source: {{ s.source }}</div>
+  </header>
+
+  <section class="kpis">
+    <div class="kpi"><div class="num">{{ s.total_users }}</div><div class="lbl">Total Users</div></div>
+    <div class="kpi"><div class="num">{{ s.age.mean }}</div><div class="lbl">Average Age</div></div>
+    <div class="kpi"><div class="num">{{ s.age.min }}–{{ s.age.max }}</div><div class="lbl">Age Range</div></div>
+    <div class="kpi"><div class="num">{{ s.occupations|length }}</div><div class="lbl">Occupations</div></div>
+  </section>
+
+  <section class="grid">
+    <div class="card"><h2>📊 Age Distribution</h2><canvas id="ageChart"></canvas></div>
+    <div class="card"><h2>⚧ Gender Split</h2><canvas id="genderChart"></canvas></div>
+    <div class="card full"><h2>💼 Users by Occupation</h2><canvas id="occChart"></canvas></div>
+  </section>
+
+  <footer>
+    Endpoints: <code>/</code> · <code>/api/stats</code> · <code>/health</code> &nbsp;|&nbsp;
+    DevOps2 End-Term — Automated CI/CD Pipeline
+  </footer>
+
+  <script>
+    const age = {{ s.age.buckets | tojson }};
+    const occ = {{ s.occupations | tojson }};
+    const gender = {{ s.gender | tojson }};
+    const palette = ['#38bdf8','#a78bfa','#34d399','#fbbf24','#f87171','#f472b6'];
+
+    new Chart(document.getElementById('ageChart'), {
+      type:'bar',
+      data:{ labels:Object.keys(age),
+             datasets:[{ label:'Users', data:Object.values(age), backgroundColor:'#38bdf8', borderRadius:6 }] },
+      options:{ plugins:{legend:{display:false}}, scales:{ x:{ticks:{color:'#94a3b8'},grid:{display:false}},
+                y:{ticks:{color:'#94a3b8'},grid:{color:'rgba(148,163,184,.1)'}} } }
+    });
+
+    new Chart(document.getElementById('genderChart'), {
+      type:'doughnut',
+      data:{ labels:Object.keys(gender),
+             datasets:[{ data:Object.values(gender), backgroundColor:['#38bdf8','#f472b6'] }] },
+      options:{ plugins:{legend:{labels:{color:'#e2e8f0'}}} }
+    });
+
+    new Chart(document.getElementById('occChart'), {
+      type:'bar',
+      data:{ labels:Object.keys(occ),
+             datasets:[{ label:'Users', data:Object.values(occ),
+                         backgroundColor:Object.keys(occ).map((_,i)=>palette[i%palette.length]), borderRadius:5 }] },
+      options:{ indexAxis:'y', plugins:{legend:{display:false}},
+                scales:{ x:{ticks:{color:'#94a3b8'},grid:{color:'rgba(148,163,184,.1)'}},
+                         y:{ticks:{color:'#94a3b8'},grid:{display:false}} } }
+    });
+  </script>
+</body>
+</html>
