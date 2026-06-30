@@ -93,7 +93,9 @@ Launch. Note its **private IP** (e.g. `10.0.1.20`) — Jenkins deploys to it.
 ### C4. Prepare the App server (SSH in)
 ```bash
 ssh -i cicd-key.pem ubuntu@<app-public-ip>
-sudo apt update && sudo apt install -y python3-venv python3-pip rsync
+# python3-pandas/python3-numpy are prebuilt (avoids a memory-heavy source
+# compile that OOMs t2.micro on Ubuntu 26.04 / Python 3.14):
+sudo apt update && sudo apt install -y python3-venv python3-pip rsync git python3-pandas python3-numpy
 # verify the IAM role works (no keys needed):
 aws sts get-caller-identity 2>/dev/null || sudo snap install aws-cli --classic
 sudo mkdir -p /opt/movielens && sudo chown -R ubuntu:ubuntu /opt/movielens
@@ -109,7 +111,7 @@ The systemd service is installed automatically by the first deploy, or manually:
 ### D1. Install Jenkins on EC2 #1
 ```bash
 ssh -i cicd-key.pem ubuntu@<jenkins-public-ip>
-sudo apt update && sudo apt install -y openjdk-17-jdk python3-venv python3-pip rsync
+sudo apt update && sudo apt install -y openjdk-17-jdk python3-venv python3-pip rsync python3-pandas python3-numpy
 curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo tee \
   /usr/share/keyrings/jenkins-keyring.asc > /dev/null
 echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \

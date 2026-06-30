@@ -38,7 +38,9 @@ pipeline {
             steps {
                 echo '===== BUILD: installing dependencies ====='
                 sh '''
-                    python3 -m venv .venv
+                    # --system-site-packages so the apt-provided pandas/numpy
+                    # (prebuilt) are visible and pip doesn't compile them.
+                    python3 -m venv --system-site-packages .venv
                     . .venv/bin/activate
                     python -m pip install --upgrade pip
                     pip install -r requirements.txt
@@ -86,7 +88,7 @@ pipeline {
                         # Install deps + restart the service on the app server
                         ssh -o StrictHostKeyChecking=no ${APP_USER}@${APP_SERVER} '
                             cd '"${APP_DIR}"' &&
-                            python3 -m venv '"${VENV}"' &&
+                            python3 -m venv --system-site-packages '"${VENV}"' &&
                             '"${VENV}"'/bin/pip install --upgrade pip &&
                             '"${VENV}"'/bin/pip install -r requirements.txt &&
                             sudo systemctl restart '"${SERVICE_NAME}"' &&

@@ -1,5 +1,10 @@
+# pandas/numpy are intentionally UNPINNED: on the AWS servers (Ubuntu 26.04 /
+# Python 3.14, 1 GB RAM) they are provided as prebuilt apt packages
+# (python3-pandas python3-numpy) and the venv is created with
+# --system-site-packages, so pip sees them already satisfied and skips the
+# (memory-heavy) source compile. Locally, pip just installs a wheel.
 Flask==3.0.3
-pandas==2.2.2
+pandas
 boto3==1.34.131
 gunicorn==22.0.0
 pytest==8.2.2
