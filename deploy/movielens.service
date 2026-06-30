@@ -12,7 +12,7 @@ After=network.target
 User=ubuntu
 WorkingDirectory=/opt/movielens/app
 # --- AWS / data source configuration (edit to match your bucket) ---
-Environment=S3_BUCKET=movielens-cicd-dataset-CHANGEME
+Environment=S3_BUCKET=movielens-cicd-dataset-preeyas
 Environment=S3_KEY=u.user
 Environment=AWS_REGION=ap-south-1
 Environment=PORT=5000
